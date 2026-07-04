@@ -455,6 +455,125 @@
   }
   .pw-box button:hover { background: rgba(201,169,110,0.08); border-color: var(--gold); }
 
+  /* ——— 音乐播放器 ——— */
+  .music-widget {
+    grid-column: 1 / -1;
+    animation: heroReveal 1.2s 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    border: 1px solid var(--glass-border);
+    border-radius: 2px;
+    background: var(--glass);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    overflow: hidden;
+  }
+  .music-widget .mw-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .music-widget .mw-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .music-widget .mw-song {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    color: var(--moon);
+    letter-spacing: 0.03em;
+  }
+  .music-widget .mw-artist {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+  .music-widget .mw-player {
+    flex-shrink: 0;
+    border-radius: 2px;
+    overflow: hidden;
+    width: 280px;
+    height: 52px;
+  }
+  .music-widget .mw-player iframe {
+    border: none;
+    width: 100%;
+    height: 100%;
+    filter: invert(0.88) hue-rotate(180deg);
+    opacity: 0.75;
+  }
+
+  /* ——— 学习时间线 ——— */
+  .timeline {
+    grid-column: 1 / -1;
+    animation: heroReveal 1.2s 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    position: relative;
+    padding-left: 24px;
+  }
+  .timeline .tl-title {
+    font-family: 'Playfair Display', 'Noto Serif SC', serif;
+    font-size: 20px;
+    color: var(--moon);
+    letter-spacing: 0.04em;
+    margin-bottom: 20px;
+  }
+  .timeline .tl-title span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    margin-left: 10px;
+    text-transform: uppercase;
+  }
+  .timeline .tl-line {
+    position: absolute;
+    left: 6px;
+    top: 52px;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, rgba(201,169,110,0.4), rgba(201,169,110,0.05));
+  }
+  .tl-item {
+    position: relative;
+    padding: 0 0 28px 28px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 4px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: var(--bg-deep);
+    transition: all 0.3s;
+  }
+  .tl-item:hover::before {
+    background: var(--gold);
+    box-shadow: 0 0 12px rgba(201,169,110,0.4);
+  }
+  .tl-item .tl-phase {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .tl-item .tl-name {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px;
+    color: var(--moon);
+    margin: 4px 0;
+    letter-spacing: 0.03em;
+  }
+  .tl-item .tl-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
   @media (max-width: 800px) {
     .main { grid-template-columns: 1fr; padding: 40px 20px 40px; gap: 24px; }
     .hero-name { font-size: clamp(36px, 12vw, 60px); }
@@ -493,7 +612,7 @@
 
 <main class="main">
   <div class="hero">
-    <div class="hero-avatar"><img src="明.jpg" alt="明月"></div>
+    <div class="hero-avatar"><img src="new.jpg" alt="明月"></div>
     <div class="hero-name-wrap">
       <h1 class="hero-name">明<span class="dot">·</span>月</h1>
     </div>
@@ -504,7 +623,7 @@
     <p class="intro-role">&#9670; 我已急哭</p>
     <p class="intro-text">
       正在通过AI了解学习云计算，<em>搭建自己的云上项目</em>。<br>
-      目标是成为一名<em>懂业务、懂架构</em>的云工程师。<br>
+      目标是成为一名<em>真正的</em>的云工程师。<br>
       嗯哼？ &mdash; 快快抹干眼泪，看昙花多美
     </p>
   </div>
@@ -523,10 +642,21 @@
   </div>
 
   <div class="status-cards">
-    <div class="stat-card"><div class="stat-icon">&#x2609;</div><div class="stat-num">念旧</div><div class="stat-label">安利一首</div></div>
+    <div class="stat-card"><div class="stat-icon">&#x2609;</div><div class="stat-num">须尽欢</div><div class="stat-label">安利一首</div></div>
     <div class="stat-card"><div class="stat-icon">&#x263D;</div><div class="stat-num">骄躁</div><div class="stat-label">当前状态</div></div>
     <div class="stat-card"><div class="stat-icon">&#x2302;</div><div class="stat-num">平静</div><div class="stat-label">心之所愿</div></div>
     <div class="stat-card"><div class="stat-icon">&#x2691;</div><div class="stat-num">2026</div><div class="stat-label">启程之年</div></div>
+  </div>
+
+  <div class="music-widget">
+    <div class="mw-icon">&#x266A;</div>
+    <div class="mw-info">
+      <div class="mw-song">须尽欢</div>
+      <div class="mw-artist">郑浩Z-Hao</div>
+    </div>
+    <div class="mw-player">
+      <iframe src="https://music.163.com/outchain/player?type=2&id=1406036590&auto=0&height=32"></iframe>
+    </div>
   </div>
 
   <div class="guestbook">
@@ -552,6 +682,17 @@
     <div class="image-grid" id="imageGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:100%; max-width:460px; margin-top:4px;">
       <div class="gb-loading">加载中...</div>
     </div>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-title">学 习 之 旅<span>learning timeline</span></div>
+    <div class="tl-line"></div>
+    <div class="tl-item"><div class="tl-phase">Phase 1</div><div class="tl-name">一台服务器，一个网站</div><div class="tl-desc">HTML + Nginx + HTTPS 证书，亲手把页面放上公网</div></div>
+    <div class="tl-item"><div class="tl-phase">Phase 2</div><div class="tl-name">前后端分离 + 留言板</div><div class="tl-desc">Flask + SQLite + Nginx 反向代理，第一次跑通完整链路</div></div>
+    <div class="tl-item"><div class="tl-phase">Phase 3</div><div class="tl-name">云数据库 MySQL</div><div class="tl-desc">SQLite 迁移至阿里云 RDS，计算与存储开始分离</div></div>
+    <div class="tl-item"><div class="tl-phase">Phase 4</div><div class="tl-name">Docker + CI/CD</div><div class="tl-desc">容器化部署 + GitHub Actions，git push 自动上线</div></div>
+    <div class="tl-item"><div class="tl-phase">Phase 5</div><div class="tl-name">图床 + 对象存储</div><div class="tl-desc">引入阿里云 OSS，上传/复制/删除，图片不再存服务器</div></div>
+    <div class="tl-item" style="padding-bottom:0;"><div class="tl-phase">Next</div><div class="tl-name">K8s / 全栈 / AI 部署</div><div class="tl-desc">三条分叉路，选定方向，继续深入</div></div>
   </div>
 
   <div class="footer-line">明 月 · 2003</div>

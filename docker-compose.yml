@@ -14,7 +14,7 @@ services:
       - "443:443"
     volumes:
       - ./project/phase1/index.html:/usr/share/nginx/html/index.html:ro
-      - ./project/phase1/明.jpg:/usr/share/nginx/html/明.jpg:ro
+      - ./project/phase1/new.jpg:/usr/share/nginx/html/new.jpg:ro
       - ./project/phase1/upload.html:/usr/share/nginx/html/upload.html:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt/live/mingyue15.xyz/fullchain.pem:/etc/letsencrypt/live/mingyue15.xyz/fullchain.pem:ro
