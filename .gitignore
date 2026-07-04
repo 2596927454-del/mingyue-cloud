@@ -1,0 +1,24 @@
+# 解包临时文件
+unpacked_cloud/
+
+# Playwright 截图和日志
+.playwright-mcp/
+
+# Screenshots
+*.png
+
+# Claude 配置（含本地设置）
+.claude/
+cloud-mentor/
+.mcp.json
+notes/.claude/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 敏感信息文件
+.env
+
+# 学习文档（太大，暂不上传）
+*.docx
