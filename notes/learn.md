@@ -83,6 +83,30 @@ GitHub Actions 工作流：push master → SSH 到 ECS → git pull → docker c
 
 ---
 
+## 2026-07-04 第五阶段：图床，引入 OSS 对象存储
+
+第五阶段新增了一个独立模块——图床，不依赖留言板，是在现有架构上横向扩展。
+
+### 核心变化
+
+- 新增 `images` 表，OSS SDK 集成
+- `POST /api/upload`：接收文件 → 校验类型/大小 → OSS 上传 → MySQL 存链接 → 返回 URL
+- `GET /api/images`、`DELETE /api/images/<id>`：列表和删除
+- `flask-limiter` 频率限制（上传 5次/分钟）
+- 前端 `upload.html`：拖拽上传 + 图片网格 + 一键复制链接 + 删除
+
+### 踩坑
+
+1. **Dockerfile 路径错配**：ECS 上旧版 Dockerfile 写 `COPY app.py .`，但新代码在 `project/phase2/app.py`。本地 repo 虽然更新了，但 ECS 上的旧 Dockerfile 没被 git pull 覆盖（因为它在 .gitignore 之外但在 git 里是 untracked）
+2. **requirements.txt 被覆盖**：误将 app.py 内容写入了 requirements.txt，导致 pip install 失败
+3. **flask-limiter API 变化**：3.x 版本参数从 `get_remote_address=` 改为 `key_func=`
+
+### OSS URL 格式
+
+内网上传用 `http://oss-cn-beijing-internal.aliyuncs.com`（免流量），公网访问 URL 用 `https://{bucket}.oss-cn-beijing.aliyuncs.com/{key}`。公私分离是关键。
+
+---
+
 ---
 
 ## 2026-05-30 一周走完 1~2 个月的学习路线，代码没写，影响大吗？
