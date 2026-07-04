@@ -1212,9 +1212,9 @@
   }
 
   resize();
-  createStars(350);
+  createStars(600);
   requestAnimationFrame(draw);
-  window.addEventListener('resize', function() { resize(); createStars(350); });
+  window.addEventListener('resize', function() { resize(); createStars(600); });
 })();
 
 // ——— 鼠标光晕跟随 ———
@@ -1531,13 +1531,19 @@ loadMessages();
     var origY = moonOrig.top + 80;
     var mx = origX + (cx - origX) * gathering;
     var my = origY + (cy - origY) * gathering;
+    // 月亮随聚集变大（160px → 280px）
+    var scale = 1 + gathering * 0.75;
     moonEl.style.transition = 'none';
+    moonEl.style.width = (160 * scale) + 'px';
+    moonEl.style.height = (160 * scale) + 'px';
     if (realmActive || gathering > 0.005) {
-      moonEl.style.left = (mx - 80) + 'px';
-      moonEl.style.top = (my - 80) + 'px';
+      moonEl.style.left = (mx - 80 * scale) + 'px';
+      moonEl.style.top = (my - 80 * scale) + 'px';
       moonEl.style.right = 'auto';
     } else {
       moonEl.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      moonEl.style.width = '160px';
+      moonEl.style.height = '160px';
       moonEl.style.left = 'auto';
       moonEl.style.top = moonOrig.top + 'px';
       moonEl.style.right = moonOrig.right + 'px';
