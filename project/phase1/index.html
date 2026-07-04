@@ -186,6 +186,17 @@
     text-transform: uppercase;
     animation: heroReveal 1.2s 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   }
+  .hero-sub .cursor {
+    display: inline-block;
+    width: 2px; height: 1em;
+    background: var(--gold);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 0.8s step-end infinite;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
 
   @keyframes heroReveal {
     from { opacity: 0; transform: translateY(24px); }
@@ -589,6 +600,43 @@
   }
   @keyframes lbIn { from { opacity: 0; } to { opacity: 1; } }
 
+  /* ——— 里世界 ——— */
+  .realm-btn {
+    position: fixed; bottom: 32px; right: 32px; z-index: 50;
+    padding: 10px 22px;
+    background: var(--glass); border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--gold); letter-spacing: 0.12em;
+    cursor: pointer; transition: all 0.35s ease;
+  }
+  .realm-btn:hover {
+    background: rgba(201,169,110,0.1); border-color: var(--gold);
+    box-shadow: 0 0 30px rgba(201,169,110,0.2);
+  }
+  .realm-exit {
+    position: fixed; top: 24px; right: 32px; z-index: 300;
+    padding: 8px 18px;
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--gold); letter-spacing: 0.1em;
+    cursor: pointer; transition: all 0.3s;
+    display: none;
+  }
+  .realm-exit:hover { border-color: var(--gold); background: rgba(201,169,110,0.1); }
+  .realm-hint {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); z-index: 300;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--text-dim); letter-spacing: 0.1em;
+    display: none; animation: hintPulse 2s ease-in-out infinite;
+  }
+  @keyframes hintPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+  #webcam { position: fixed; top: 0; left: 0; opacity: 0; pointer-events: none; z-index: 0; }
+
   @media (max-width: 800px) {
     .main { grid-template-columns: 1fr; padding: 40px 20px 40px; gap: 24px; }
     .hero-name { font-size: clamp(36px, 12vw, 60px); }
@@ -631,7 +679,7 @@
     <div class="hero-name-wrap">
       <h1 class="hero-name">明<span class="dot">·</span>月</h1>
     </div>
-    <span class="hero-sub">cloud &nbsp; engineer &nbsp; in &nbsp; making</span>
+    <span class="hero-sub"><span id="typewriter"></span><span class="cursor"></span></span>
   </div>
 
   <div class="intro">
@@ -666,11 +714,11 @@
   <div class="music-widget">
     <div class="mw-icon">&#x266A;</div>
     <div class="mw-info">
-      <div class="mw-song">须尽欢</div>
-      <div class="mw-artist">郑浩Z-Hao</div>
+      <div class="mw-song">念旧</div>
+      <div class="mw-artist">姜铭杨</div>
     </div>
     <div class="mw-player">
-      <iframe src="https://music.163.com/outchain/player?type=2&id=1406036590&auto=0&height=32"></iframe>
+      <iframe src="https://music.163.com/outchain/player?type=2&id=2079555244&auto=0&height=32"></iframe>
     </div>
   </div>
 
@@ -712,6 +760,11 @@
 
   <div class="footer-line">明 月 · 2003</div>
 </main>
+
+<button class="realm-btn" id="realmBtn" onclick="enterRealm()">里 世 界</button>
+<button class="realm-exit" id="realmExit" onclick="exitRealm()">&#x2190; 返回表世界</button>
+<div class="realm-hint" id="realmHint">张开手掌，散落繁星 &nbsp;|&nbsp; 合拢手掌，月聚星辰</div>
+<video id="webcam" autoplay playsinline></video>
 
 <script>
 // ========================================
@@ -953,13 +1006,28 @@
   }
 
   function drawStars() {
+    // 里世界：星星向目标聚集
+    var gState = (window.realm && window.realm.gathering) || 0;
+    var moonCX = (window.realm && window.realm.moonCX) || w/2;
+    var moonCY = (window.realm && window.realm.moonCY) || h/2;
+
     for (var i = 0; i < stars.length; i++) {
       var s = stars[i];
       s.a += s.speed;
       var alpha = 0.25 + 0.55 * Math.sin(s.a + s.phase);
 
+      // 根据聚集状态插值星星位置
+      var dx = s.x - moonCX;
+      var dy = s.y - moonCY;
+      var dist = Math.sqrt(dx*dx+dy*dy);
+      var gatherR = 30 + s.r * 12; // 聚集后到月亮中心的距离
+      var targetX = moonCX + (dist > 0 ? dx/dist * gatherR : 0);
+      var targetY = moonCY + (dist > 0 ? dy/dist * gatherR : 0);
+      var lx = s.x + (targetX - s.x) * gState;
+      var ly = s.y + (targetY - s.y) * gState;
+
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.arc(lx, ly, s.r, 0, Math.PI * 2);
       ctx.fillStyle = 'hsla(' + s.hue + ', ' + s.sat + ', ' + s.light + ', ' + alpha.toFixed(2) + ')';
       ctx.fill();
 
@@ -1280,6 +1348,23 @@ loadMessages();
   loadImageList();
 })();
 
+// ——— 打字机效果（循环） ———
+(function() {
+  var text = 'cloud engineer in making';
+  var el = document.getElementById('typewriter');
+  var i = 0, deleting = false;
+  function tick() {
+    if (!deleting) {
+      if (i < text.length) { el.textContent += text.charAt(i); i++; setTimeout(tick, 50 + Math.random() * 35); }
+      else { deleting = true; setTimeout(tick, 2000); }
+    } else {
+      if (i > 0) { i--; el.textContent = text.slice(0, i); setTimeout(tick, 20 + Math.random() * 15); }
+      else { deleting = false; setTimeout(tick, 600); }
+    }
+  }
+  setTimeout(tick, 800);
+})();
+
 // ——— 点击涟漪 ———
 (function() {
   var canvas = document.getElementById('ripple');
@@ -1323,6 +1408,119 @@ loadMessages();
   resize();
   requestAnimationFrame(draw);
   window.addEventListener('resize', resize);
+})();
+
+// ——— 里世界：手势识别 + 月亮/星星交互 ———
+(function() {
+  var realmActive = false;
+  var gathering = 0, targetGathering = 0;
+  var moonEl = document.querySelector('.moon-real');
+  var moonOrig = { top: 72, right: 108 };
+  var mainEl = document.querySelector('.main');
+  var stream = null;
+  window.realm = { gathering: 0, moonCX: 0, moonCY: 0 };
+
+  function updateMoon() {
+    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    window.realm.moonCX = cx; window.realm.moonCY = cy;
+    if (!realmActive && gathering < 0.002) return;
+    gathering += (targetGathering - gathering) * 0.08;
+    window.realm.gathering = gathering;
+    var origX = window.innerWidth - moonOrig.right - 80;
+    var origY = moonOrig.top + 80;
+    var mx = origX + (cx - origX) * gathering;
+    var my = origY + (cy - origY) * gathering;
+    if (realmActive || gathering > 0.005) {
+      moonEl.style.transition = 'none';
+      moonEl.style.left = (mx - 80) + 'px';
+      moonEl.style.top = (my - 80) + 'px';
+      moonEl.style.right = 'auto';
+    } else {
+      moonEl.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      moonEl.style.top = moonOrig.top + 'px';
+      moonEl.style.right = moonOrig.right + 'px';
+      moonEl.style.left = 'auto';
+    }
+  }
+
+  function processGesture(landmarks) {
+    if (!landmarks || !landmarks.length) { targetGathering = 0; return; }
+    var tips = [landmarks[4], landmarks[8], landmarks[12], landmarks[16], landmarks[20]];
+    var bases = [landmarks[2], landmarks[5], landmarks[9], landmarks[13], landmarks[17]];
+    var palm = { x: 0, y: 0 };
+    for (var k = 0; k < bases.length; k++) { palm.x += bases[k].x; palm.y += bases[k].y; }
+    palm.x /= 5; palm.y /= 5;
+    var avgDist = 0;
+    for (k = 0; k < tips.length; k++) {
+      avgDist += Math.sqrt(Math.pow(tips[k].x-palm.x,2) + Math.pow(tips[k].y-palm.y,2));
+    }
+    avgDist /= 5;
+    var wristDist = Math.sqrt(Math.pow(landmarks[0].x-palm.x,2) + Math.pow(landmarks[0].y-palm.y,2));
+    var ratio = avgDist / (wristDist + 0.01);
+    if (ratio > 0.85) targetGathering = 0;
+    else if (ratio < 0.45) targetGathering = 1;
+  }
+
+  function onResults(results) {
+    processGesture(results.multiHandLandmarks && results.multiHandLandmarks[0]);
+  }
+
+  window.enterRealm = function() {
+    realmActive = true;
+    document.getElementById('realmBtn').style.display = 'none';
+    document.getElementById('realmExit').style.display = 'block';
+    document.getElementById('realmHint').style.display = 'block';
+    mainEl.style.opacity = '0';
+    mainEl.style.pointerEvents = 'none';
+    mainEl.style.transition = 'opacity 0.5s';
+    if (!stream) {
+      navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240, facingMode: 'user' } })
+        .then(function(s) {
+          stream = s;
+          var video = document.getElementById('webcam');
+          video.srcObject = s;
+          video.play();
+          var script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js';
+          script.onload = function() {
+            var Hands = window.Hands;
+            if (!Hands) return;
+            var hands = new Hands({ locateFile: function(f) { return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/' + f; } });
+            hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
+            hands.onResults(onResults);
+            function detect() {
+              if (!realmActive) return;
+              hands.send({ image: video }).then(function() { if (realmActive) requestAnimationFrame(detect); });
+            }
+            detect();
+          };
+          document.head.appendChild(script);
+        })
+        .catch(function() {
+          document.addEventListener('mousemove', function(e) {
+            if (!realmActive) return;
+            targetGathering = e.clientX / window.innerWidth > 0.5 ? 1 : 0;
+          });
+        });
+    }
+  };
+
+  window.exitRealm = function() {
+    realmActive = false; targetGathering = 0;
+    document.getElementById('realmBtn').style.display = 'block';
+    document.getElementById('realmExit').style.display = 'none';
+    document.getElementById('realmHint').style.display = 'none';
+    mainEl.style.opacity = '1'; mainEl.style.pointerEvents = 'auto';
+    updateMoon();
+  };
+
+  function animate() {
+    if (realmActive) updateMoon();
+    else if (gathering > 0.001) { gathering *= 0.93; window.realm.gathering = gathering; updateMoon(); }
+    requestAnimationFrame(animate);
+  }
+  animate();
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && realmActive) window.exitRealm(); });
 })();
 </script>
 
