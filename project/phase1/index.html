@@ -635,8 +635,6 @@
     0%, 100% { opacity: 0.4; }
     50% { opacity: 0.9; }
   }
-  #webcam { position: fixed; top: 0; left: 0; opacity: 0; pointer-events: none; z-index: 0; }
-
   @media (max-width: 800px) {
     .main { grid-template-columns: 1fr; padding: 40px 20px 40px; gap: 24px; }
     .hero-name { font-size: clamp(36px, 12vw, 60px); }
@@ -763,8 +761,7 @@
 
 <button class="realm-btn" id="realmBtn" onclick="enterRealm()">里 世 界</button>
 <button class="realm-exit" id="realmExit" onclick="exitRealm()">&#x2190; 返回表世界</button>
-<div class="realm-hint" id="realmHint">张开手掌，散落繁星 &nbsp;|&nbsp; 合拢手掌，月聚星辰</div>
-<video id="webcam" autoplay playsinline></video>
+<div class="realm-hint" id="realmHint">鼠标右移，月聚星辰 &nbsp;|&nbsp; 鼠标左移，繁星散落 &nbsp;|&nbsp; 空格键 切换</div>
 
 <script>
 // ========================================
@@ -1417,13 +1414,20 @@ loadMessages();
   var moonEl = document.querySelector('.moon-real');
   var moonOrig = { top: 72, right: 108 };
   var mainEl = document.querySelector('.main');
-  var stream = null;
   window.realm = { gathering: 0, moonCX: 0, moonCY: 0 };
 
-  // 鼠标控制（默认）
+  // 鼠标控制
   function onMouseMove(e) {
     if (!realmActive) return;
-    targetGathering = e.clientX / window.innerWidth > 0.5 ? 1 : 0;
+    // 鼠标越靠右，聚集程度越高
+    var pct = e.clientX / window.innerWidth;
+    targetGathering = Math.max(0, Math.min(1, pct));
+  }
+
+  // 空格键切换
+  function onKeyDown(e) {
+    if (!realmActive) return;
+    if (e.code === 'Space') { e.preventDefault(); targetGathering = targetGathering > 0.5 ? 0 : 1; }
   }
 
   function updateMoon() {
@@ -1450,28 +1454,6 @@ loadMessages();
     }
   }
 
-  function processGesture(landmarks) {
-    if (!landmarks || !landmarks.length) { targetGathering = 0; return; }
-    var tips = [landmarks[4], landmarks[8], landmarks[12], landmarks[16], landmarks[20]];
-    var bases = [landmarks[2], landmarks[5], landmarks[9], landmarks[13], landmarks[17]];
-    var palm = { x: 0, y: 0 };
-    for (var k = 0; k < bases.length; k++) { palm.x += bases[k].x; palm.y += bases[k].y; }
-    palm.x /= 5; palm.y /= 5;
-    var avgDist = 0;
-    for (k = 0; k < tips.length; k++) {
-      avgDist += Math.sqrt(Math.pow(tips[k].x-palm.x,2) + Math.pow(tips[k].y-palm.y,2));
-    }
-    avgDist /= 5;
-    var wristDist = Math.sqrt(Math.pow(landmarks[0].x-palm.x,2) + Math.pow(landmarks[0].y-palm.y,2));
-    var ratio = avgDist / (wristDist + 0.01);
-    if (ratio > 0.85) targetGathering = 0;
-    else if (ratio < 0.45) targetGathering = 1;
-  }
-
-  function onResults(results) {
-    processGesture(results.multiHandLandmarks && results.multiHandLandmarks[0]);
-  }
-
   window.enterRealm = function() {
     realmActive = true;
     targetGathering = 0;
@@ -1481,41 +1463,14 @@ loadMessages();
     mainEl.style.opacity = '0';
     mainEl.style.pointerEvents = 'none';
     mainEl.style.transition = 'opacity 0.5s';
-    // 默认鼠标控制
     document.addEventListener('mousemove', onMouseMove);
-    // 尝试摄像头增强
-    if (!stream) {
-      navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240, facingMode: 'user' } })
-        .then(function(s) {
-          stream = s;
-          var video = document.getElementById('webcam');
-          video.srcObject = s;
-          video.play();
-          var script = document.createElement('script');
-          script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js';
-          script.onload = function() {
-            var Hands = window.Hands;
-            if (!Hands) return;
-            var hands = new Hands({ locateFile: function(f) { return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/' + f; } });
-            hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
-            hands.onResults(onResults);
-            // 摄像头就绪后移除鼠标控制
-            document.removeEventListener('mousemove', onMouseMove);
-            function detect() {
-              if (!realmActive) return;
-              hands.send({ image: video }).then(function() { if (realmActive) requestAnimationFrame(detect); });
-            }
-            detect();
-          };
-          document.head.appendChild(script);
-        })
-        .catch(function() { /* 摄像头不可用，鼠标控制继续生效 */ });
-    }
+    document.addEventListener('keydown', onKeyDown);
   };
 
   window.exitRealm = function() {
     realmActive = false; targetGathering = 0;
     document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('keydown', onKeyDown);
     document.getElementById('realmBtn').style.display = 'block';
     document.getElementById('realmExit').style.display = 'none';
     document.getElementById('realmHint').style.display = 'none';
