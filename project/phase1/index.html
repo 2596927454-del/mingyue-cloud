@@ -635,6 +635,8 @@
     0%, 100% { opacity: 0.4; }
     50% { opacity: 0.9; }
   }
+  #webcam { position: fixed; top: 0; left: 0; opacity: 0; pointer-events: none; z-index: 0; }
+
   @media (max-width: 800px) {
     .main { grid-template-columns: 1fr; padding: 40px 20px 40px; gap: 24px; }
     .hero-name { font-size: clamp(36px, 12vw, 60px); }
@@ -761,7 +763,8 @@
 
 <button class="realm-btn" id="realmBtn" onclick="enterRealm()">里 世 界</button>
 <button class="realm-exit" id="realmExit" onclick="exitRealm()">&#x2190; 返回表世界</button>
-<div class="realm-hint" id="realmHint">鼠标右移，月聚星辰 &nbsp;|&nbsp; 鼠标左移，繁星散落 &nbsp;|&nbsp; 空格键 切换</div>
+<div class="realm-hint" id="realmHint">&#x1F44B; 张开手掌，散落繁星 &nbsp;|&nbsp; &#x1F44F; 合拢手掌，月聚星辰 &nbsp;|&nbsp; 空格键 切换</div>
+<video id="webcam" autoplay playsinline></video>
 
 <script>
 // ========================================
@@ -1414,20 +1417,39 @@ loadMessages();
   var moonEl = document.querySelector('.moon-real');
   var moonOrig = { top: 72, right: 108 };
   var mainEl = document.querySelector('.main');
+  var stream = null;
   window.realm = { gathering: 0, moonCX: 0, moonCY: 0 };
 
-  // 鼠标控制
+  // 鼠标控制（摄像头不可用时的降级方案）
   function onMouseMove(e) {
     if (!realmActive) return;
-    // 鼠标越靠右，聚集程度越高
-    var pct = e.clientX / window.innerWidth;
-    targetGathering = Math.max(0, Math.min(1, pct));
+    targetGathering = Math.max(0, Math.min(1, e.clientX / window.innerWidth));
   }
 
   // 空格键切换
   function onKeyDown(e) {
     if (!realmActive) return;
     if (e.code === 'Space') { e.preventDefault(); targetGathering = targetGathering > 0.5 ? 0 : 1; }
+  }
+
+  function processGesture(landmarks) {
+    if (!landmarks || !landmarks.length) { targetGathering = 0; return; }
+    var tips = [landmarks[4], landmarks[8], landmarks[12], landmarks[16], landmarks[20]];
+    var bases = [landmarks[2], landmarks[5], landmarks[9], landmarks[13], landmarks[17]];
+    var palm = { x: 0, y: 0 };
+    for (var k = 0; k < bases.length; k++) { palm.x += bases[k].x; palm.y += bases[k].y; }
+    palm.x /= 5; palm.y /= 5;
+    var avgDist = 0;
+    for (k = 0; k < tips.length; k++) {
+      avgDist += Math.sqrt(Math.pow(tips[k].x-palm.x,2) + Math.pow(tips[k].y-palm.y,2));
+    }
+    avgDist /= 5;
+    var wristDist = Math.sqrt(Math.pow(landmarks[0].x-palm.x,2) + Math.pow(landmarks[0].y-palm.y,2));
+    if (wristDist < 0.01) return;
+    var ratio = avgDist / wristDist;
+    // ratio > 0.9 → 手掌张开；ratio < 0.5 → 手掌合拢
+    if (ratio > 0.9) targetGathering = 0;
+    else if (ratio < 0.5) targetGathering = 1;
   }
 
   function updateMoon() {
@@ -1463,8 +1485,43 @@ loadMessages();
     mainEl.style.opacity = '0';
     mainEl.style.pointerEvents = 'none';
     mainEl.style.transition = 'opacity 0.5s';
+    // 默认启动鼠标控制
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('keydown', onKeyDown);
+    // 尝试摄像头手势识别
+    if (!stream) {
+      navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } })
+        .then(function(s) {
+          stream = s;
+          var video = document.getElementById('webcam');
+          video.srcObject = s;
+          video.play();
+          var script = document.createElement('script');
+          script.src = '/mediapipe/hands.js';
+          script.onload = function() {
+            var Hands = window.Hands;
+            if (!Hands) return;
+            var hands = new Hands({ locateFile: function(f) { return '/mediapipe/' + f; } });
+            hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
+            hands.onResults(function(results) {
+              processGesture(results.multiHandLandmarks && results.multiHandLandmarks[0]);
+            });
+            // 手势就绪，移除鼠标控制
+            document.removeEventListener('mousemove', onMouseMove);
+            document.getElementById('realmHint').innerHTML = '&#x1F44B; 张开手掌，散落繁星 &nbsp;|&nbsp; &#x1F44F; 合拢手掌，月聚星辰 &nbsp;|&nbsp; 空格键 切换';
+            function detect() {
+              if (!realmActive || !stream) return;
+              hands.send({ image: video }).then(function() { if (realmActive) requestAnimationFrame(detect); });
+            }
+            detect();
+          };
+          document.head.appendChild(script);
+        })
+        .catch(function() {
+          // 摄像头不可用，鼠标继续，更新提示
+          document.getElementById('realmHint').innerHTML = '鼠标右移，月聚星辰 &nbsp;|&nbsp; 鼠标左移，繁星散落 &nbsp;|&nbsp; 空格键 切换';
+        });
+    }
   };
 
   window.exitRealm = function() {
