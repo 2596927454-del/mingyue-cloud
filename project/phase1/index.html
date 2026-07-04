@@ -574,6 +574,21 @@
     line-height: 1.7;
   }
 
+  /* ——— 图片灯箱 ——— */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(6,11,24,0.92);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    animation: lbIn 0.25s ease;
+  }
+  .lightbox img {
+    max-width: 90vw; max-height: 90vh;
+    border-radius: 2px;
+    box-shadow: 0 0 60px rgba(201,169,110,0.15);
+  }
+  @keyframes lbIn { from { opacity: 0; } to { opacity: 1; } }
+
   @media (max-width: 800px) {
     .main { grid-template-columns: 1fr; padding: 40px 20px 40px; gap: 24px; }
     .hero-name { font-size: clamp(36px, 12vw, 60px); }
@@ -672,7 +687,7 @@
   </div>
 
   <div class="guestbook" style="padding-top: 8px;">
-    <div class="gb-title">图 床<span>image host</span></div>
+    <div class="gb-title">风景聚集地<span>gallery</span></div>
     <div class="gb-form" id="dropZone" style="border: 2px dashed rgba(201,169,110,0.2); border-radius: 4px; padding: 36px 24px; text-align: center; transition: all 0.3s; cursor: pointer;">
       <div style="font-size: 32px; margin-bottom: 8px;">&#x21E7;</div>
       <p style="font-family: 'JetBrains Mono',monospace; font-size: 12px; color: var(--text-dim); letter-spacing: 0.04em;">拖拽图片到这里，或 <em style="color:var(--gold);font-style:normal;">点击选择</em></p>
@@ -1209,7 +1224,7 @@ loadMessages();
           var name = img.filename.length > 16 ? img.filename.slice(0,13)+'...' : img.filename;
           html += '<div class="stat-card" style="padding:0;overflow:hidden;position:relative;">'
             + '<button onclick="event.stopPropagation();askDelete(' + img.id + ')" style="position:absolute;top:6px;right:6px;z-index:2;background:rgba(0,0,0,0.6);border:none;color:#e06060;width:24px;height:24px;border-radius:2px;cursor:pointer;font-size:14px;opacity:0;transition:opacity 0.3s;" onmouseenter="this.style.opacity=1" onmouseout="this.style.opacity=0">&times;</button>'
-            + '<img src="' + img.oss_url + '" style="width:100%;height:120px;object-fit:cover;display:block;" loading="lazy">'
+            + '<img src="' + img.oss_url + '" style="width:100%;height:120px;object-fit:cover;display:block;cursor:pointer;" loading="lazy" onclick="showLightbox(\'' + img.oss_url + '\')">'
             + '<div style="padding:6px 10px;display:flex;justify-content:space-between;align-items:center;">'
             + '<span onclick="copyImgUrl(\'' + img.oss_url + '\',this)" style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--accent);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px;" title="' + img.oss_url + '">' + name + '</span>'
             + '<button onclick="event.stopPropagation();copyImgUrl(\'' + img.oss_url + '\',this)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--dim);cursor:pointer;padding:2px 8px;font-family:\'JetBrains Mono\',monospace;font-size:9px;">复制</button>'
@@ -1219,6 +1234,14 @@ loadMessages();
       })
       .catch(function() { imageGrid.innerHTML = '<div class="gb-error" style="grid-column:1/-1;">加载失败</div>'; });
   }
+
+  window.showLightbox = function(url) {
+    var lb = document.createElement('div');
+    lb.className = 'lightbox';
+    lb.innerHTML = '<img src=\"' + url + '\">';
+    lb.addEventListener('click', function() { lb.remove(); });
+    document.body.appendChild(lb);
+  };
 
   window.copyImgUrl = function(url, el) {
     if (navigator.clipboard && window.isSecureContext) {
