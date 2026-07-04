@@ -1,0 +1,11 @@
+services:
+  blog:
+    build: .
+    container_name: mingyue-blog
+    restart: always
+    networks:
+      - cloud-net
+
+networks:
+  cloud-net:
+    external: true

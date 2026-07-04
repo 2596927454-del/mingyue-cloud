@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ post.title }} - 明月 · 博客</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-dark.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #080d1a; --moon: #f0ebe0;
+    --gold: #c9a96e; --text: #bcc4d0;
+    --dim: #5a6070; --border: rgba(255,255,255,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Noto Serif SC', serif; min-height: 100vh;
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 60px 24px; }
+
+  .post-header {
+    text-align: center; padding-bottom: 32px; margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .post-header h1 {
+    font-size: 32px; color: var(--moon); font-weight: 900;
+    letter-spacing: 0.04em; line-height: 1.4; margin-bottom: 10px;
+  }
+  .post-header .post-date {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--gold); letter-spacing: 0.1em;
+  }
+
+  .markdown-body {
+    background: transparent !important; color: var(--text) !important;
+    font-family: 'Noto Serif SC', serif !important; line-height: 2 !important;
+    font-size: 16px !important;
+  }
+  .markdown-body h1, .markdown-body h2, .markdown-body h3 { color: var(--moon) !important; border-bottom-color: var(--border) !important; }
+  .markdown-body pre { background: rgba(0,0,0,0.3) !important; border-radius: 4px !important; }
+  .markdown-body code { font-family: 'JetBrains Mono', monospace !important; font-size: 0.9em !important; background: rgba(201,169,110,0.08) !important; }
+  .markdown-body pre code { background: transparent !important; }
+  .markdown-body a { color: var(--gold) !important; }
+  .markdown-body blockquote { border-left-color: var(--gold) !important; color: var(--dim) !important; }
+  .markdown-body table { border-color: var(--border) !important; }
+  .markdown-body th, .markdown-body td { border-color: var(--border) !important; }
+  .markdown-body img { border-radius: 2px; }
+
+  .back-row {
+    display: flex; justify-content: space-between; margin-top: 48px;
+    padding-top: 24px; border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  .back-row a { color: var(--dim); text-decoration: none; letter-spacing: 0.06em; transition: color 0.3s; }
+  .back-row a:hover { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="post-header">
+    <h1>{{ post.title }}</h1>
+    <div class="post-date">{{ post.date_str }}</div>
+  </div>
+  <article class="markdown-body">{{ post.content|safe }}</article>
+  <div class="back-row">
+    <a href="/blog/">&#x2190; 文章列表</a>
+    <a href="/">&#x2190; 返回主页</a>
+  </div>
+</div>
+</body>
+</html>

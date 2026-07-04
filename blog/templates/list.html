@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明月 · 博客</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-dark.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #080d1a; --card: #0d1428; --moon: #f0ebe0;
+    --gold: #c9a96e; --accent: #8bb4d8; --text: #bcc4d0;
+    --dim: #5a6070; --border: rgba(255,255,255,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Noto Serif SC', serif; min-height: 100vh;
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 60px 24px; }
+
+  /* 头部 */
+  .blog-header {
+    text-align: center; padding-bottom: 40px; margin-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .blog-header h1 {
+    font-family: 'Noto Serif SC', serif; font-weight: 900;
+    font-size: 42px; color: var(--moon); letter-spacing: 0.05em;
+  }
+  .blog-header h1 span { color: var(--gold); }
+  .blog-header .sub {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--dim); letter-spacing: 0.25em; margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  /* 文章列表 */
+  .post-item {
+    padding: 24px 0; border-bottom: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .post-item:hover { background: rgba(255,255,255,0.01); padding-left: 16px; }
+  .post-item a { text-decoration: none; display: block; }
+  .post-item .post-date {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--dim); letter-spacing: 0.06em; margin-bottom: 6px;
+  }
+  .post-item .post-title {
+    font-size: 20px; color: var(--moon); font-weight: 700;
+    letter-spacing: 0.03em; margin-bottom: 6px; transition: color 0.3s;
+  }
+  .post-item:hover .post-title { color: var(--gold); }
+  .post-item .post-excerpt {
+    font-size: 14px; color: var(--dim); line-height: 1.8;
+  }
+
+  .empty { text-align: center; color: var(--dim); padding: 60px 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  .back-link {
+    display: block; text-align: center; margin-top: 40px;
+    color: var(--dim); font-size: 12px; text-decoration: none;
+    font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em;
+    transition: color 0.3s;
+  }
+  .back-link:hover { color: var(--gold); }
+
+  /* 代码高亮 */
+  .markdown-body { background: transparent !important; color: var(--text) !important; }
+  .markdown-body pre { background: var(--card) !important; }
+  .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="blog-header">
+    <h1>明<span>·</span>月 博客</h1>
+    <p class="sub">Thoughts & Notes</p>
+  </div>
+
+  {% if posts %}
+    {% for post in posts %}
+    <div class="post-item">
+      <a href="/blog/{{ post.slug }}">
+        <div class="post-date">{{ post.date_str }}</div>
+        <div class="post-title">{{ post.title }}</div>
+        <div class="post-excerpt">{{ post.excerpt }}</div>
+      </a>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">还没有文章</div>
+  {% endif %}
+
+  <a class="back-link" href="/">&#x2190; 返回主页</a>
+</div>
+</body>
+</html>
