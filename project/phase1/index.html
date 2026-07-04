@@ -1420,26 +1420,33 @@ loadMessages();
   var stream = null;
   window.realm = { gathering: 0, moonCX: 0, moonCY: 0 };
 
+  // 鼠标控制（默认）
+  function onMouseMove(e) {
+    if (!realmActive) return;
+    targetGathering = e.clientX / window.innerWidth > 0.5 ? 1 : 0;
+  }
+
   function updateMoon() {
     var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
     window.realm.moonCX = cx; window.realm.moonCY = cy;
-    if (!realmActive && gathering < 0.002) return;
-    gathering += (targetGathering - gathering) * 0.08;
+    if (!realmActive && gathering < 0.001) return;
+    gathering += (targetGathering - gathering) * 0.07;
+    if (gathering < 0.001) gathering = 0;
     window.realm.gathering = gathering;
     var origX = window.innerWidth - moonOrig.right - 80;
     var origY = moonOrig.top + 80;
     var mx = origX + (cx - origX) * gathering;
     var my = origY + (cy - origY) * gathering;
+    moonEl.style.transition = 'none';
     if (realmActive || gathering > 0.005) {
-      moonEl.style.transition = 'none';
       moonEl.style.left = (mx - 80) + 'px';
       moonEl.style.top = (my - 80) + 'px';
       moonEl.style.right = 'auto';
     } else {
       moonEl.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      moonEl.style.left = 'auto';
       moonEl.style.top = moonOrig.top + 'px';
       moonEl.style.right = moonOrig.right + 'px';
-      moonEl.style.left = 'auto';
     }
   }
 
@@ -1467,12 +1474,16 @@ loadMessages();
 
   window.enterRealm = function() {
     realmActive = true;
+    targetGathering = 0;
     document.getElementById('realmBtn').style.display = 'none';
     document.getElementById('realmExit').style.display = 'block';
     document.getElementById('realmHint').style.display = 'block';
     mainEl.style.opacity = '0';
     mainEl.style.pointerEvents = 'none';
     mainEl.style.transition = 'opacity 0.5s';
+    // 默认鼠标控制
+    document.addEventListener('mousemove', onMouseMove);
+    // 尝试摄像头增强
     if (!stream) {
       navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240, facingMode: 'user' } })
         .then(function(s) {
@@ -1488,6 +1499,8 @@ loadMessages();
             var hands = new Hands({ locateFile: function(f) { return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/' + f; } });
             hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
             hands.onResults(onResults);
+            // 摄像头就绪后移除鼠标控制
+            document.removeEventListener('mousemove', onMouseMove);
             function detect() {
               if (!realmActive) return;
               hands.send({ image: video }).then(function() { if (realmActive) requestAnimationFrame(detect); });
@@ -1496,27 +1509,22 @@ loadMessages();
           };
           document.head.appendChild(script);
         })
-        .catch(function() {
-          document.addEventListener('mousemove', function(e) {
-            if (!realmActive) return;
-            targetGathering = e.clientX / window.innerWidth > 0.5 ? 1 : 0;
-          });
-        });
+        .catch(function() { /* 摄像头不可用，鼠标控制继续生效 */ });
     }
   };
 
   window.exitRealm = function() {
     realmActive = false; targetGathering = 0;
+    document.removeEventListener('mousemove', onMouseMove);
     document.getElementById('realmBtn').style.display = 'block';
     document.getElementById('realmExit').style.display = 'none';
     document.getElementById('realmHint').style.display = 'none';
     mainEl.style.opacity = '1'; mainEl.style.pointerEvents = 'auto';
-    updateMoon();
   };
 
   function animate() {
     if (realmActive) updateMoon();
-    else if (gathering > 0.001) { gathering *= 0.93; window.realm.gathering = gathering; updateMoon(); }
+    else if (gathering > 0.001) { gathering *= 0.85; if (gathering < 0.001) gathering = 0; window.realm.gathering = gathering; updateMoon(); }
     requestAnimationFrame(animate);
   }
   animate();
