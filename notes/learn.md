@@ -57,6 +57,32 @@
 
 ---
 
+## 2026-07-04 第二次走第四阶段：Docker + CI/CD，真正的一键部署
+
+第四阶段彻底改变了部署方式——从"SSH 上去手动敲命令"变成"git push 完事"。
+
+### Docker 容器化收获
+
+- 两个容器（Nginx + Flask）通过 Docker Compose 编排，内部网络自动 DNS 解析（`proxy_pass http://flask:5000`）
+- SSL 证书从宿主机挂载进 Nginx 容器，HTTPS 正常工作
+- 环境变量通过 `.env` 文件注入，不硬编码
+
+### CI/CD 收获
+
+GitHub Actions 工作流：push master → SSH 到 ECS → git pull → docker compose up -d --build。从提交代码到服务器更新，全自动。
+
+### 这次踩的坑
+
+1. Docker Hub 直连超时——国内 ECS 必须配镜像加速器，且 `systemctl restart docker` 后配置才生效
+2. Flask 监听 `127.0.0.1` 导致容器间 502——Docker 内必须监听 `0.0.0.0`，Nginx 才能通过 Docker 网络访问
+3. 容器化后 SSL 没了——需要把宿主机的 Let's Encrypt 证书挂载进 Nginx 容器，加上 443 端口映射
+
+### 对比上次
+
+上次第四阶段折腾了很久 Docker Compose 旧版本 KeyError。这次直接用新版 Docker 29.1.3 + Compose v2，整个过程顺利得多。
+
+---
+
 ---
 
 ## 2026-05-30 一周走完 1~2 个月的学习路线，代码没写，影响大吗？
