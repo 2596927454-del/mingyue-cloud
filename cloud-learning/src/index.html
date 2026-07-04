@@ -625,16 +625,6 @@
     display: none;
   }
   .realm-exit:hover { border-color: var(--gold); background: rgba(201,169,110,0.1); }
-  .realm-hint {
-    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); z-index: 300;
-    font-family: 'JetBrains Mono', monospace; font-size: 13px;
-    color: var(--text-dim); letter-spacing: 0.1em;
-    display: none; animation: hintPulse 2s ease-in-out infinite;
-  }
-  @keyframes hintPulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.9; }
-  }
   #webcam { position: fixed; top: 0; left: 0; opacity: 0; pointer-events: none; z-index: 0; }
 
   @media (max-width: 800px) {
@@ -763,7 +753,6 @@
 
 <button class="realm-btn" id="realmBtn" onclick="enterRealm()">里 世 界</button>
 <button class="realm-exit" id="realmExit" onclick="exitRealm()">&#x2190; 返回表世界</button>
-<div class="realm-hint" id="realmHint">&#x1F44B; 张开手掌，散落繁星 &nbsp;|&nbsp; &#x1F44F; 合拢手掌，月聚星辰 &nbsp;|&nbsp; 空格键 切换</div>
 <video id="webcam" autoplay playsinline></video>
 
 <script>
@@ -1555,7 +1544,6 @@ loadMessages();
     targetGathering = 0;
     document.getElementById('realmBtn').style.display = 'none';
     document.getElementById('realmExit').style.display = 'block';
-    document.getElementById('realmHint').style.display = 'block';
     mainEl.style.opacity = '0';
     mainEl.style.pointerEvents = 'none';
     mainEl.style.transition = 'opacity 0.5s';
@@ -1582,7 +1570,6 @@ loadMessages();
             });
             // 手势就绪，移除鼠标控制
             document.removeEventListener('mousemove', onMouseMove);
-            document.getElementById('realmHint').innerHTML = '&#x1F44B; 张开手掌，散落繁星 &nbsp;|&nbsp; &#x1F44F; 合拢手掌，月聚星辰 &nbsp;|&nbsp; 空格键 切换';
             function detect() {
               if (!realmActive || !stream) return;
               hands.send({ image: video }).then(function() { if (realmActive) requestAnimationFrame(detect); });
@@ -1591,10 +1578,7 @@ loadMessages();
           };
           document.head.appendChild(script);
         })
-        .catch(function() {
-          // 摄像头不可用，鼠标继续，更新提示
-          document.getElementById('realmHint').innerHTML = '鼠标右移，月聚星辰 &nbsp;|&nbsp; 鼠标左移，繁星散落 &nbsp;|&nbsp; 空格键 切换';
-        });
+        .catch(function() { /* 摄像头不可用，鼠标控制继续生效 */ });
     }
   };
 
@@ -1604,7 +1588,6 @@ loadMessages();
     document.removeEventListener('keydown', onKeyDown);
     document.getElementById('realmBtn').style.display = 'block';
     document.getElementById('realmExit').style.display = 'none';
-    document.getElementById('realmHint').style.display = 'none';
     mainEl.style.opacity = '1'; mainEl.style.pointerEvents = 'auto';
   };
 
