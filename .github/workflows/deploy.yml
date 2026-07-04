@@ -18,4 +18,5 @@ jobs:
           script: |
             cd /root/project
             git pull origin master
+            cd cloud-learning/src
             docker compose up -d --build
