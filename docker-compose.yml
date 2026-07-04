@@ -1,0 +1,25 @@
+services:
+  flask:
+    build: .
+    container_name: guestbook-flask
+    env_file:
+      - .env
+    restart: always
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: guestbook-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./project/phase1/index.html:/usr/share/nginx/html/index.html:ro
+      - ./project/phase1/明.jpg:/usr/share/nginx/html/明.jpg:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt/live/mingyue15.xyz/fullchain.pem:/etc/letsencrypt/live/mingyue15.xyz/fullchain.pem:ro
+      - /etc/letsencrypt/live/mingyue15.xyz/privkey.pem:/etc/letsencrypt/live/mingyue15.xyz/privkey.pem:ro
+      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
+      - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
+    depends_on:
+      - flask
+    restart: always
