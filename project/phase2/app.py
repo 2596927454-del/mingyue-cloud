@@ -216,6 +216,9 @@ def upload_image():
 @app.route('/api/images/<int:image_id>', methods=['DELETE'])
 @limiter.limit("10 per minute")
 def delete_image(image_id):
+    data = request.get_json() or {}
+    if data.get('password') != '0125':
+        return jsonify({'error': '密码错误'}), 403
     conn = get_db()
     try:
         with conn.cursor() as cur:
