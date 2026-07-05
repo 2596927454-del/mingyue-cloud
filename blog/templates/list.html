@@ -4,32 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>明月 · 博客</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-dark.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-light.css">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Playfair+Display:ital@0;1&family=JetBrains+Mono:wght@300;400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400&display=swap');
 
   :root {
-    --bg: #2a2520; --surface: #322d27;
-    --ink: #e8e2d8; --ink-dim: #9a948c;
-    --gold: #b8956a; --gold-dim: rgba(184,149,106,0.12);
-    --border: rgba(255,255,255,0.08);
+    --bg: #f5f1eb; --surface: #ede6db;
+    --ink: #3d362c; --ink-dim: #8a8278;
+    --gold: #9b7b52; --gold-dim: rgba(155,123,82,0.08);
+    --border: rgba(0,0,0,0.07);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     background: var(--bg); color: var(--ink);
     font-family: 'Noto Serif SC', serif; min-height: 100vh;
-    /* 极简纹理：细密横纹模拟纸张 */
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.01) 2px, rgba(255,255,255,0.01) 4px);
   }
-  body::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background: radial-gradient(ellipse at 50% 0%, rgba(184,149,106,0.04) 0%, transparent 70%);
-  }
-  .container { position: relative; z-index: 1; max-width: 660px; margin: 0 auto; padding: 80px 24px 60px; }
+  .container { max-width: 660px; margin: 0 auto; padding: 80px 24px 60px; }
 
-  /* 头部 */
   .blog-header { text-align: center; padding-bottom: 36px; margin-bottom: 48px; position: relative; }
   .blog-header::after {
     content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
@@ -46,7 +38,6 @@
     text-transform: uppercase;
   }
 
-  /* 文章列表 */
   .post-item {
     padding: 28px 0; border-bottom: 1px solid var(--border);
     transition: all 0.35s ease;
@@ -61,7 +52,6 @@
   .post-item .post-title {
     font-size: 20px; color: var(--ink); font-weight: 600;
     letter-spacing: 0.04em; margin-bottom: 8px; transition: color 0.3s;
-    line-height: 1.4;
   }
   .post-item:hover .post-title { color: var(--gold); }
   .post-item .post-excerpt {
@@ -79,10 +69,9 @@
   }
   .back-link:hover { color: var(--gold); }
 
-  /* 代码块 */
   .markdown-body { background: transparent !important; color: var(--ink) !important; }
   .markdown-body pre { background: var(--surface) !important; border: 1px solid var(--border) !important; }
-  .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+  .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; background: var(--gold-dim) !important; border-radius: 2px; padding: 1px 5px; }
 </style>
 </head>
 <body>
