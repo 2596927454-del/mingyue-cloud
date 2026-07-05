@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import timedelta
 import pymysql
 import oss2
 from dbutils.pooled_db import PooledDB
@@ -96,6 +97,13 @@ def teardown_db(exception):
     close_db()
 
 
+def fmt_time(dt):
+    """UTC → 北京时间"""
+    if dt is None:
+        return ''
+    return (dt + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+
+
 # ——— 留言板 API ———
 
 @app.route('/api/messages', methods=['GET'])
@@ -107,7 +115,7 @@ def get_messages():
             rows = cur.fetchall()
         messages = [
             {'id': r[0], 'nickname': r[1], 'content': r[2],
-             'created_at': r[3].strftime('%Y-%m-%d %H:%M:%S') if r[3] else ''}
+             'created_at': fmt_time(r[3])}
             for r in rows
         ]
         return jsonify(messages)
@@ -140,6 +148,25 @@ def post_message():
                         (nickname, content))
         conn.commit()
         return jsonify({'ok': True}), 201
+    finally:
+        close_db()
+
+
+@app.route('/api/messages/<int:msg_id>', methods=['DELETE'])
+def delete_message(msg_id):
+    data = request.get_json() or {}
+    if data.get('password') != '月明':
+        return jsonify({'error': '密码错误'}), 403
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('SELECT id FROM messages WHERE id = %s', (msg_id,))
+            if not cur.fetchone():
+                return jsonify({'error': '留言不存在'}), 404
+            cur.execute('DELETE FROM messages WHERE id = %s', (msg_id,))
+        conn.commit()
+        return jsonify({'ok': True})
     finally:
         close_db()
 

@@ -1247,7 +1247,8 @@ function loadMessages() {
       }
       var html = '';
       data.forEach(function(msg) {
-        html += '<div class="gb-card">'
+        html += '<div class="gb-card" style="position:relative;">'
+          + '<button onclick="event.stopPropagation();askDelMsg(' + msg.id + ')" style="position:absolute;top:8px;right:10px;background:rgba(0,0,0,0.5);border:none;color:#e06060;width:22px;height:22px;border-radius:2px;cursor:pointer;font-size:12px;opacity:0;transition:opacity 0.3s;" onmouseenter="this.style.opacity=1" onmouseout="this.style.opacity=0">&times;</button>'
           + '<div class="gb-meta">'
           + '<span class="gb-nickname">' + escapeHtml(msg.nickname) + '</span>'
           + '<span class="gb-time">' + formatTime(msg.created_at) + '</span>'
@@ -1293,6 +1294,30 @@ function submitMessage() {
       btn.disabled = false;
       btn.textContent = '发送';
     });
+}
+
+window.askDelMsg = function(id) {
+  var overlay = document.createElement('div');
+  overlay.className = 'pw-overlay';
+  overlay.innerHTML = '<div class="pw-box"><p>输入密码删除留言</p><input type="password" id="delMsgPw" maxlength="4" placeholder="密码" autofocus><button id="delMsgConfirm">确 认</button><button id="delMsgCancel" style="margin-left:4px;border-color:var(--border);color:var(--dim);">取消</button></div>';
+  document.body.appendChild(overlay);
+  document.getElementById('delMsgPw').focus();
+  document.getElementById('delMsgConfirm').onclick = function() { doDelMsg(id, overlay); };
+  document.getElementById('delMsgCancel').onclick = function() { overlay.remove(); };
+  document.getElementById('delMsgPw').addEventListener('keydown', function(e) { if (e.key === 'Enter') doDelMsg(id, overlay); });
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+};
+
+function doDelMsg(id, overlay) {
+  var pw = document.getElementById('delMsgPw').value;
+  fetch('/api/messages/' + id, { method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({password: pw}) })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      overlay.remove();
+      if (d.ok) { loadMessages(); }
+      else { alert(d.error || '删除失败'); }
+    })
+    .catch(function() { overlay.remove(); alert('网络错误'); });
 }
 
 // 页面加载时读取留言
