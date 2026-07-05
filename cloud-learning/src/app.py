@@ -1,6 +1,5 @@
 import os
 import uuid
-from datetime import timedelta
 import pymysql
 import oss2
 from dbutils.pooled_db import PooledDB
@@ -98,10 +97,10 @@ def teardown_db(exception):
 
 
 def fmt_time(dt):
-    """UTC → 北京时间"""
+    """格式化时间"""
     if dt is None:
         return ''
-    return (dt + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
 # ——— 留言板 API ———
